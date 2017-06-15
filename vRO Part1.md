@@ -17,7 +17,7 @@ The script object takes an input parameter (VMName) of type string, and it creat
 	  System.log(vCenter.name);
 	  var allVms = vCenter.getAllVirtualMachines();
 	  for each (vm in allVms) {
-		if ( vm.name == VMName) {
+		if ( vm.name.toLowerCase() == VMName.toLowerCase()) {
 		  System.log("VM " + vm.name + " found on " + vCenter.name);
 		  vms.push(vm);
 		}
