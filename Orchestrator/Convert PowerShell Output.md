@@ -10,7 +10,7 @@ I already had an action for running PowerShell scripts, given that the output ob
 
 Finally, I settled on the idea that I could possibly output the object as XML, and then use some combination of getChildNodes() to get the properties, and then I could loop over the array of PowershellRemotePSObject, and grab the properties of each item, and create an object with the corresponding properties.  The problem here was that it seemed like I could get a unique list of attributes, but if, for instance, I was querying the tags of multiple Vms, the return objects would be heterogeneous, and wouldn't all have the same attributes.  So, then I looked at the XML, and realized I could probably parse it with RegEx.
 
-# Helpful tools
+## Helpful tool
 
 If you've never used it, https://regex101.com/ has an online editor where you can feed it a RegExp, and an input string, and it will show you how it gets parsed by the interpreter.  This is a life saver when you're trying to build a regex.  So what I came up with is that there are basically two things I need to worry about: for each object returned by the output, there is a <MS> ... </MS> node.  Under that, each property is under <S N="{attribute name}">{attribute value}</S> 
 
