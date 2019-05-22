@@ -1,4 +1,4 @@
-# Converting PowerShell objects to JavaScript objects with dynamic properties
+# Converting PowerShell objects to JavaScript objects with dynamic properties in vRealize Orchestrator
 
 I've been working on a workflow that would complete all of our decommission steps for a Virtual Machine.  One step was to alert the DBAs if the VM has SQL on it.  So at this point, I am scanning all of our VMs and inventorying what has SQL, and what doesn't, and importing that into our CMDB.  I've taken this data, and I've used it to tag the VMs with the engine that is installed.  So I have a Tag Category called SQLEngine, and the Tag Value is the engine installed on that VM.  I figured the easiest way to figure out if a VM has SQL, in VRO, will be to read the tag assignments, and look for this flag.  The problem is we still have VCenters on v6.0, and don't have the VAPI available for our entire environment yet, which is when tagging is really fully functional from an API standpoint.  So in the mean time, any other tag operations I'm doing via VRO are being done with PowerShell via PowerShellHost.  I figured, I'd just do Get-Vm | Get-TagAssignment, and output that to VRO and I'd get the tag assignments that way - while I was at it, I'd go ahead and create a reusable action that just returned ALL tags, and not just the ones I'm interested in for this purpose - because code should be reusable! 
 
@@ -12,11 +12,12 @@ Finally, I settled on the idea that I could possibly output the object as XML, a
 
 ## Helpful tool
 
-If you've never used it, https://regex101.com/ has an online editor where you can feed it a RegExp, and an input string, and it will show you how it gets parsed by the interpreter.  This is a life saver when you're trying to build a regex.  So what I came up with is that there are basically two things I need to worry about: for each object returned by the output, there is a <MS> ... </MS> node.  Under that, each property is under <S N="{attribute name}">{attribute value}</S> 
+If you've never used it, https://regex101.com/ has an online editor where you can feed it a RegExp, and an input string, and it will show you how it gets parsed by the interpreter.  This is a life saver when you're trying to build a regex.  So what I came up with is that there are basically two things I need to worry about: for each object returned by the output, there is a \<MS\> ... \</MS\> node.  Under that, each property is under \<S N="{attribute name}"\>{attribute value}\</S\> 
 
 So I came up with two regular expressions that would fit these:
-/<MS>.*<\/MS>/g;
-/<S N=\"([^\"]+)\">([^<]+)<\/S>/g;
+
+     /<MS>.*<\/MS>/g;
+     /<S N=\"([^\"]+)\">([^<]+)<\/S>/g;
 
 For the second, I use capture groups to grab the attribute names and values, and I just loop over the objects, and create a dictionary, looping over the sub-nodes containing the attributes.  Here is what the Action in VRO looks like: 
 
